@@ -1,4 +1,5 @@
-import { Component } from 'react';
+import { useState } from 'react';
+
 import { GoSearch } from 'react-icons/go';
 
 import {
@@ -9,41 +10,38 @@ import {
   SearchFormInput,
 } from './Searchbar.styled';
 
-export class Searchbar extends Component {
-  state = {
-    query: '',
+export const Searchbar = ({ onSubmit }) => {
+  const [query, setQuery] = useState('');
+
+  const inputChange = event => {
+    setQuery(event.target.value);
   };
-  inputChange = event => {
-    this.setState({ query: event.target.value });
-  };
-  handleSearch = event => {
+
+  const handleSearch = event => {
     event.preventDefault();
-    if (!this.state.query.trim()) {
+    if (!query.trim()) {
       return;
     }
-    this.props.onSubmit(this.state.query);
+    onSubmit(query);
   };
-  render() {
-    const { query } = this.state;
 
-    return (
-      <SearchBar>
-        <SearchForm onSubmit={this.handleSearch}>
-          <SearchFormButton type="submit">
-            <GoSearch size="20" />
-            <SearchFormBtnLabel>Search</SearchFormBtnLabel>
-          </SearchFormButton>
+  return (
+    <SearchBar>
+      <SearchForm onSubmit={handleSearch}>
+        <SearchFormButton type="submit">
+          <GoSearch size="20" />
+          <SearchFormBtnLabel>Search</SearchFormBtnLabel>
+        </SearchFormButton>
 
-          <SearchFormInput
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={query}
-            onChange={this.inputChange}
-          />
-        </SearchForm>
-      </SearchBar>
-    );
-  }
-}
+        <SearchFormInput
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={query}
+          onChange={inputChange}
+        />
+      </SearchForm>
+    </SearchBar>
+  );
+};

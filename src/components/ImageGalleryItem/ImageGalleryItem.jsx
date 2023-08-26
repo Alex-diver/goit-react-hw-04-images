@@ -4,16 +4,15 @@ import { Modal } from '../Modal/Mobal';
 
 import { ImageGalleryItemImg } from './ImageGalleryItem.styled';
 
-export const ImageGalleryItem = props => {
+export const ImageGalleryItem = ({
+  image: { webformatURL, largeImageURL, tags },
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const {
-    image: { webformatURL, largeImageURL, tags },
-  } = props;
   return (
     <>
       <ImageGalleryItemImg
