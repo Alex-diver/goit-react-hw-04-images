@@ -18,6 +18,56 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLastPage, setIsLastPage] = useState(false);
 
+  useEffect(() => {
+    const getImages = async () => {
+      if (query.trim() === '') return;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
+
+      try {
+        setIsLoading(true);
+
+        const data = await AllImages(
+          query,
+          currentPage,
+          abortControllerRef.current.signal
+        );
+
+        if (data.hits.length === 0) {
+          toast.info(
+            'Sorry, there are no images matching your search query. Please try again.',
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
+        } else if (currentPage === 1) {
+          toast.success('We found some images for you!', {
+            position: toast.POSITION.TOP_RIGHT,
+          });
+        } else {
+          toast.success('We found some more images for you!', {
+            position: toast.POSITION.TOP_RIGHT,
+          });
+        }
+        const scaledHits = scaleHits(data.hits);
+
+        setImages(prevState => [...prevState, ...scaledHits]);
+        setError(null);
+      } catch (error) {
+        console.log('Error code:', error.code);
+        if (error.code !== 'ERR_CANCELED') {
+          setError(error.message);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getImages();
+  }, [currentPage, query]);
+
   const handleSearchSubmit = newQuery => {
     if (newQuery === query) {
       return;
@@ -29,66 +79,13 @@ export const App = () => {
     setIsLastPage(false);
   };
 
-  useEffect(() => {
-    if (query.trim() === '') return;
-    getImages();
-  }, [currentPage, query]);
-
-  const getImages = async () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      setIsLoading(true);
-
-      const data = await AllImages(
-        query,
-        currentPage,
-        abortControllerRef.current.signal
-      );
-
-      if (data.hits.length === 0) {
-        toast.info(
-          'Sorry, there are no images matching your search query. Please try again.',
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
-      } else if (currentPage === 1) {
-        toast.success('We found some images for you!', {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      } else {
-        toast.success('We found some more images for you!', {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      }
-      const scaledHits = scaleHits(data.hits);
-
-      setImages(prevState => [...prevState, ...scaledHits]);
-      setIsLastPage(
-        IsLastPage => images.length + scaledHits.length >= data.totalHits
-      );
-      setError(null);
-    } catch (error) {
-      console.log('Error code:', error.code);
-      if (error.code !== 'ERR_CANCELED') {
-        setError(error.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const loadMore = () => {
     setCurrentPage(prevPage => prevPage + 1);
   };
 
   return (
     <AppStyled>
-      <ToastContainer autoClose={2500} />
+      <ToastContainer autoClose={1500} />
       <Searchbar onSubmit={handleSearchSubmit} />
 
       {error && <Error>Error: {error}</Error>}
