@@ -52,12 +52,13 @@ export const App = () => {
             position: toast.POSITION.TOP_RIGHT,
           });
         }
+
         const scaledHits = scaleHits(data.hits);
 
-        setImages(prevState => [...prevState, ...scaledHits]);
+        setImages(prevImages => [...prevImages, ...scaledHits]);
+        setIsLastPage(currentPage >= data.totalHits / 12);
         setError(null);
       } catch (error) {
-        console.log('Error code:', error.code);
         if (error.code !== 'ERR_CANCELED') {
           setError(error.message);
         }
@@ -65,6 +66,7 @@ export const App = () => {
         setIsLoading(false);
       }
     };
+
     getImages();
   }, [currentPage, query]);
 
